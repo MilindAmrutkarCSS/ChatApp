@@ -9,14 +9,16 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_message_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintLeft_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/viewForAlignment"/>
 
     <View
+        android:id="@+id/viewForAlignment"
         android:layout_width="0dp"
-        android:layout_height="2dp"
+        android:layout_height="4dp"
         android:layout_marginBottom="0dp"
         android:background="#dfdfdf"
         app:layout_constraintBottom_toTopOf="@+id/layout_chatbox"
@@ -35,19 +37,20 @@
         app:layout_constraintRight_toRightOf="parent">
 
         <EditText
-            android:id="@+id/edittext_chatbox"
+            android:id="@+id/etChatMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_weight="1"
+            android:inputType="textCapSentences"
             android:background="@android:color/transparent"
             android:hint="Enter message"
             android:maxLines="6" />
 
         <Button
-            android:id="@+id/button_chatbox_send"
+            android:id="@+id/btnSend"
             android:layout_width="64dp"
             android:layout_height="48dp"
             android:layout_gravity="bottom"

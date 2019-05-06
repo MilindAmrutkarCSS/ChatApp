@@ -5,7 +5,6 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.milind.chatapp.R;
-import com.milind.chatapp.model.BotMessage;
 import com.milind.chatapp.model.Message;
 
 import java.util.List;
@@ -44,7 +42,6 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         Message message = (Message) mMessageList.get(position);
-        Log.i(TAG, "getItemViewType: User ID: " + message.getSender().getUserId());
 
         if (message.getMessageID().equals("Q101") || message.getMessageID().equals("Q102")) {
             return VIEW_TYPE_MESSAGE_RECEIVED;
@@ -71,7 +68,6 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Message message = (Message) mMessageList.get(position);
-        Log.i(TAG, "onBindViewHolder: userId: " + message.getSender().getUserId());
         switch (holder.getItemViewType()) {
             case VIEW_TYPE_MESSAGE_SENT:
                 ((SentMessageHolder) holder).bind(message);
