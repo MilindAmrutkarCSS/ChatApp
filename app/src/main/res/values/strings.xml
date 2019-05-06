@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ChatApp</string>
+    <string name="message_name">John Doe</string>
+    <string name="message_body">hey there, how are you?</string>
+    <string name="message_time">11:40</string>
+    <string name="message_sent">hello, hello!</string>
+</resources>
