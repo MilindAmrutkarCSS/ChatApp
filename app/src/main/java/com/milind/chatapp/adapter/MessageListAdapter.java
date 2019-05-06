@@ -126,7 +126,6 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
         void bind(Message message) {
             messageText.setText(message.getMessage());
-            //timeText.setText(DateUtils.formatDateTime(mContext, message.getCreatedAt(), 0));
             timeText.setText(message.getCreatedAt());
         }
     }

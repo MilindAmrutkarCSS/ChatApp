@@ -10,6 +10,7 @@ public class BotQuestions {
     private ArrayList<String> questions;
 
     public void setQuestions() {
+
         questions = new ArrayList<>();
         questions.add("Your nationality?");
         questions.add("Current City?");

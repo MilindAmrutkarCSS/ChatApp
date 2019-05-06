@@ -1,10 +1,13 @@
 package com.milind.chatapp;
 
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Context;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -13,15 +16,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.milind.chatapp.adapter.MessageListAdapter;
 import com.milind.chatapp.model.BotQuestions;
 import com.milind.chatapp.model.Message;
 import com.milind.chatapp.model.User;
-
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,8 +36,10 @@ public class MainActivity extends AppCompatActivity {
     private EditText etMessage;
     ArrayList<String> questions;
     BotQuestions botQuestions;
+    Message botMessage;
 
-    // position saves the current position of mMessageList.
+    // "position" saves the current position of mMessageList. With the help of this position counter we're retrieving the questions from
+    // questions list.
     int position = 0;
 
     private static final String TAG = "MainActivity";
@@ -50,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         initializeMessageList();
 
+        // Here we're creating an object of BotQuestions to get our questions and initializing them in questions ArrayList
         botQuestions = new BotQuestions();
         botQuestions.setQuestions();
         questions = botQuestions.getQuestions();
@@ -62,14 +67,14 @@ public class MainActivity extends AppCompatActivity {
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selfUser = new User("102", "Me", "https://randomuser.me/api/portraits/thumb/men/65.jpg");
+                selfUser = new User("102", "Milind", "https://randomuser.me/api/portraits/thumb/men/65.jpg");
                 String usersReply = etMessage.getText().toString();
                 Message userMessage;
                 if (!TextUtils.isEmpty(usersReply)) {
-                    userMessage = new Message("A102", etMessage.getText().toString(), selfUser, "1:17");
+                    userMessage = new Message("A102", etMessage.getText().toString(), selfUser, getCurrentTime());
                     mMessageList.add(userMessage);
 
-                    // Check to see if there are no more questions in the questions ArrayList
+                    // Check to see if there are no more questions in the questions ArrayList. And here we're generating the JSON.
                     if (position == questions.size()) {
                         generateJson();
 
@@ -87,10 +92,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //for getting the next
     private void getTheNextQuestion(int position) {
         if (mMessageList != null) {
-            Message botMessage;
-            botMessage = new Message("Q101", questions.get(position), botUser, "11:28");
+            botMessage = new Message("Q101", questions.get(position), botUser, getCurrentTime());
             mMessageList.add(botMessage);
         }
     }
@@ -108,13 +113,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeMessageList() {
-        selfUser = new User("101", "milind", "https://randomuser.me/api/portraits/thumb/men/65.jpg");
         botUser = new User("102", "bot", "https://randomuser.me/api/portraits/lego/1.jpg");
 
         if (mMessageList != null) {
-            Message botMessage = new Message("Q101", "Hello there. Please provide your name?", botUser, "11:28");
+            botMessage = new Message("Q101", "Hello there. Please provide your name?", botUser, getCurrentTime());
             mMessageList.add(botMessage);
         }
+    }
+
+
+    private String getCurrentTime() {
+        Date currentTime = Calendar.getInstance().getTime();
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm ");
+        String localTime = dateFormat.format(currentTime);
+        return localTime;
     }
 
     private void generateJson() {
