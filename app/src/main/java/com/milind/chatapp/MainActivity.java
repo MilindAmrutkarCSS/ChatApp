@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -69,12 +70,29 @@ public class MainActivity extends AppCompatActivity {
 
         mMessageRecycler = findViewById(R.id.recyclerview_message_list);
         mMessageAdapter = new MessageListAdapter(this, mMessageList);
-        mMessageRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
+        mMessageRecycler.setLayoutManager(linearLayoutManager);
         mMessageRecycler.setAdapter(mMessageAdapter);
+
+        mMessageRecycler.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                if(bottom < oldBottom) {
+                    mMessageRecycler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mMessageRecycler.smoothScrollToPosition(mMessageAdapter.getItemCount());
+                        }
+                    }, 100);
+                }
+            }
+        });
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //mMessageRecycler.scrollToPosition(mMessageAdapter.getItemCount());
+
                 selfUser = new User("101", "Milind", "https://randomuser.me/api/portraits/thumb/men/65.jpg");
                 String usersReply = etMessage.getText().toString();
                 Message userMessage;
@@ -97,9 +115,12 @@ public class MainActivity extends AppCompatActivity {
                 hideKeyboard(etMessage);
             }
         });
+
+
+
     }
 
-    //for getting the next
+    //for getting the next question from questions arraylist
     private void getTheNextQuestion(int position) {
         if (mMessageList != null) {
             botMessage = new Message(getMessageId("bot"), questions.get(position), botUser, getCurrentTime());
@@ -107,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //for hiding the keyboard after typing is complete on EditText
     private void hideKeyboard(EditText editText) {
         editText.setText("");
         InputMethodManager imm =
@@ -114,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
         imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
     }
 
+    //For generating message Id's
     private String getMessageId(String userType) {
         String generatedMessageId;
         if (userType.equalsIgnoreCase("bot")) {
@@ -127,11 +150,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //for initializing views
     private void initializeViews() {
         btnSend = findViewById(R.id.btnSend);
         etMessage = findViewById(R.id.etChatMessage);
     }
 
+    //for initializing message list
     private void initializeMessageList() {
         botUser = new User("102", "bot", "https://randomuser.me/api/portraits/lego/1.jpg");
 
@@ -141,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // for getting the current time
     private String getCurrentTime() {
         Date currentTime = Calendar.getInstance().getTime();
         DateFormat dateFormat = new SimpleDateFormat("HH:mm ");
@@ -148,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
         return localTime;
     }
 
+    // for generating the json
     private void generateJson() {
         Gson gson = new GsonBuilder().create();
         String json = gson.toJson(mMessageList);
