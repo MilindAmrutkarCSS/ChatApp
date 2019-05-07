@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TabWidget;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -77,13 +78,8 @@ public class MainActivity extends AppCompatActivity {
         mMessageRecycler.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                if(bottom < oldBottom) {
-                    mMessageRecycler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mMessageRecycler.smoothScrollToPosition(mMessageAdapter.getItemCount());
-                        }
-                    }, 100);
+                if (bottom < oldBottom) {
+                    mMessageRecycler.smoothScrollToPosition(mMessageAdapter.getItemCount());
                 }
             }
         });
@@ -91,8 +87,7 @@ public class MainActivity extends AppCompatActivity {
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //mMessageRecycler.scrollToPosition(mMessageAdapter.getItemCount());
-
+                //mMessageRecycler.smoothScrollToPosition(mMessageAdapter.getItemCount());
                 selfUser = new User("101", "Milind", "https://randomuser.me/api/portraits/thumb/men/65.jpg");
                 String usersReply = etMessage.getText().toString();
                 Message userMessage;
@@ -103,20 +98,19 @@ public class MainActivity extends AppCompatActivity {
                     // Check to see if there are no more questions in the questions ArrayList. And here we're generating the JSON.
                     if (position == questions.size()) {
                         generateJson();
-
+                        etMessage.setText("");
                     } else {
                         Log.i(TAG, "onClick: position: " + position + " questions.size(): " + questions.size());
                         getTheNextQuestion(position);
                         position++;
+                        etMessage.setText("");
                     }
                 } else {
                     Toast.makeText(MainActivity.this, "Please write your response", Toast.LENGTH_SHORT).show();
                 }
-                hideKeyboard(etMessage);
+                //hideKeyboard(etMessage);
             }
         });
-
-
 
     }
 
