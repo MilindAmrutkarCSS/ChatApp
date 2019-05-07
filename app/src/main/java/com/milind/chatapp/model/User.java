@@ -1,12 +1,18 @@
 package com.milind.chatapp.model;
 
+import io.realm.RealmObject;
+
 /**
  * Created by Milind Amrutkar on 5/4/2019.
  */
-public class User {
-    String userId;
-    String nickname;
-    String profileUrl;
+public class User extends RealmObject {
+    private String userId;
+    private String nickname;
+    private String profileUrl;
+
+    public User() {
+
+    }
 
     public User(String userId, String nickname, String profileUrl) {
         this.userId = userId;

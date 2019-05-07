@@ -1,15 +1,18 @@
 package com.milind.chatapp.model;
 
+import io.realm.RealmObject;
+
 /**
  * Created by Milind Amrutkar on 5/4/2019.
  */
-public class Message {
-    String messageID;
-    String message;
-    User sender;
-    String createdAt;
+public class Message extends RealmObject {
+    private String messageID;
+    private String message;
+    private User sender;
+    private String createdAt;
 
     public Message() {
+
     }
 
     public Message(String messageID, String message, User sender, String createdAt) {

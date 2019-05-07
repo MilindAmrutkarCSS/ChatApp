@@ -1,39 +1,41 @@
-package com.milind.chatapp;
-
+package com.milind.chatapp.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TabWidget;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.milind.chatapp.R;
 import com.milind.chatapp.adapter.MessageListAdapter;
 import com.milind.chatapp.model.BotQuestions;
 import com.milind.chatapp.model.Message;
 import com.milind.chatapp.model.User;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+import io.realm.Realm;
+import io.realm.RealmResults;
+
+public class ChatActivity extends AppCompatActivity {
 
     private RecyclerView mMessageRecycler;
     private MessageListAdapter mMessageAdapter;
@@ -52,17 +54,30 @@ public class MainActivity extends AppCompatActivity {
     int userMessageId = 101;
     int botMessageId = 101;
 
-    private static final String TAG = "MainActivity";
+    private Realm mRealm;
+
+    private static final String TAG = "ChatActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_chat);
+
+        Toolbar myChildToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(myChildToolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         mMessageList = new ArrayList<>();
 
         initializeViews();
 
         initializeMessageList();
+
+        //initializing realm
+        Realm.init(this);
+        // creating an instance of Realm
+        mRealm = Realm.getDefaultInstance();
 
         // Here we're creating an object of BotQuestions to get our questions and initializing them in questions ArrayList
         botQuestions = new BotQuestions();
@@ -95,24 +110,29 @@ public class MainActivity extends AppCompatActivity {
                     userMessage = new Message(getMessageId("me"), etMessage.getText().toString(), selfUser, getCurrentTime());
                     mMessageList.add(userMessage);
                     mMessageAdapter.notifyDataSetChanged();
+                    mRealm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            realm.copyToRealm(userMessage);
+                        }
+                    });
 
                     // Check to see if there are no more questions in the questions ArrayList. And here we're generating the JSON.
                     if (position == questions.size()) {
                         generateJson();
                         etMessage.setText("");
                     } else {
-                        Log.i(TAG, "onClick: position: " + position + " questions.size(): " + questions.size());
+                        //Log.i(TAG, "onClick: position: " + position + " questions.size(): " + questions.size());
                         getTheNextQuestion(position);
                         position++;
                         etMessage.setText("");
                     }
                 } else {
-                    Toast.makeText(MainActivity.this, "Please write your response", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ChatActivity.this, "Please write your response", Toast.LENGTH_SHORT).show();
                 }
                 //hideKeyboard(etMessage);
             }
         });
-
     }
 
     //for getting the next question from questions arraylist
@@ -175,6 +195,28 @@ public class MainActivity extends AppCompatActivity {
         Gson gson = new GsonBuilder().create();
         String json = gson.toJson(mMessageList);
         Log.i(TAG, "json: " + json);
+
+    }
+
+    // method to add all ArrayList of messages to Realm
+    private void addMessagesToDatabase() {
+        mRealm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                for (Message message : mMessageList) {
+                    realm.copyToRealm(message);
+                }
+            }
+        });
+        Log.i(TAG, "addMessagesToDatabase: ");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mRealm != null) {
+            mRealm.close();
+        }
     }
 
 }
