@@ -10,10 +10,10 @@
         android:id="@+id/recyclerview_message_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/viewForAlignment"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintLeft_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/viewForAlignment"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <View
         android:id="@+id/viewForAlignment"
@@ -44,9 +44,9 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_weight="1"
-            android:inputType="textCapSentences"
             android:background="@android:color/transparent"
             android:hint="Enter message"
+            android:inputType="textCapSentences"
             android:maxLines="6" />
 
         <Button

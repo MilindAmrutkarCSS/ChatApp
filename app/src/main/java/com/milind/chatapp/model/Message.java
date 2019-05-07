@@ -9,6 +9,9 @@ public class Message {
     User sender;
     String createdAt;
 
+    public Message() {
+    }
+
     public Message(String messageID, String message, User sender, String createdAt) {
         this.messageID = messageID;
         this.message = message;
