@@ -70,14 +70,16 @@ public class ChatActivity extends AppCompatActivity {
 
         mMessageList = new ArrayList<>();
 
-        initializeViews();
-
-        initializeMessageList();
-
         //initializing realm
         Realm.init(this);
         // creating an instance of Realm
         mRealm = Realm.getDefaultInstance();
+
+
+        initializeViews();
+
+        initializeMessageList();
+
 
         // Here we're creating an object of BotQuestions to get our questions and initializing them in questions ArrayList
         botQuestions = new BotQuestions();
@@ -110,6 +112,7 @@ public class ChatActivity extends AppCompatActivity {
                     userMessage = new Message(getMessageId("me"), etMessage.getText().toString(), selfUser, getCurrentTime());
                     mMessageList.add(userMessage);
                     mMessageAdapter.notifyDataSetChanged();
+
                     mRealm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
@@ -179,6 +182,12 @@ public class ChatActivity extends AppCompatActivity {
         if (mMessageList != null) {
             botMessage = new Message(getMessageId("bot"), "Hello there. Please provide your name?", botUser, getCurrentTime());
             mMessageList.add(botMessage);
+            mRealm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    realm.copyToRealm(botMessage);
+                }
+            });
         }
     }
 
