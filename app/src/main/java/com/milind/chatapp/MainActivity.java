@@ -87,13 +87,14 @@ public class MainActivity extends AppCompatActivity {
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //mMessageRecycler.smoothScrollToPosition(mMessageAdapter.getItemCount());
+                mMessageRecycler.smoothScrollToPosition(mMessageAdapter.getItemCount());
                 selfUser = new User("101", "Milind", "https://randomuser.me/api/portraits/thumb/men/65.jpg");
                 String usersReply = etMessage.getText().toString();
                 Message userMessage;
                 if (!TextUtils.isEmpty(usersReply)) {
                     userMessage = new Message(getMessageId("me"), etMessage.getText().toString(), selfUser, getCurrentTime());
                     mMessageList.add(userMessage);
+                    mMessageAdapter.notifyDataSetChanged();
 
                     // Check to see if there are no more questions in the questions ArrayList. And here we're generating the JSON.
                     if (position == questions.size()) {
@@ -116,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
     //for getting the next question from questions arraylist
     private void getTheNextQuestion(int position) {
+        mMessageRecycler.smoothScrollToPosition(mMessageAdapter.getItemCount());
         if (mMessageList != null) {
             botMessage = new Message(getMessageId("bot"), questions.get(position), botUser, getCurrentTime());
             mMessageList.add(botMessage);
