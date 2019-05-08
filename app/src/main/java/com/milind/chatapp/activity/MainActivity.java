@@ -6,43 +6,30 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.milind.chatapp.R;
-import com.milind.chatapp.adapter.MessageListAdapter;
-import com.milind.chatapp.model.BotQuestions;
+import com.milind.chatapp.adapter.ChatListAdapter;
+import com.milind.chatapp.model.Chat;
 import com.milind.chatapp.model.Message;
-import com.milind.chatapp.model.User;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private Realm mRealm;
+    private RecyclerView mRecyclerView;
+    private RealmList<Chat> chatRealmList;
+    private ChatListAdapter chatListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,10 +43,22 @@ public class MainActivity extends AppCompatActivity {
         // creating an instance of Realm
         mRealm = Realm.getDefaultInstance();
 
+        initializeViews();
+
+        chatRealmList = new RealmList<>();
+
+        chatListAdapter = new ChatListAdapter(this, chatRealmList);
+        readMessagesFromDatabase();
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this,RecyclerView.VERTICAL, false));
+        mRecyclerView.setAdapter(chatListAdapter);
+
     }
 
-    public void openNext(View view) {
-        readMessagesFromDatabase();
+    private void initializeViews() {
+        mRecyclerView = findViewById(R.id.recyclerview_chat_list);
+    }
+
+    public void checkData(View view) {
         Toast.makeText(this, "Check logs", Toast.LENGTH_SHORT).show();
     }
 
@@ -79,21 +78,29 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        readMessagesFromDatabase();
+    }
+
     private void readMessagesFromDatabase() {
         mRealm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-
-                RealmResults<Message> results = realm.where(Message.class).findAll();
+                chatRealmList.clear();
+                RealmResults<Chat> results = realm.where(Chat.class).findAll();
 
                 Log.i(TAG, "==== readMessagesFromDatabase === ");
-                for (Message message : results) {
-                    Log.i(TAG, "MessageID: " + message.getMessageID() +
-                            " Message: " + message.getMessage() +
-                            " createdAt: " + message.getCreatedAt());
+                for (Chat chat : results) {
+                    Log.i(TAG, "ChatId: " + chat.getChatId());
+                    for (Message message: chat.getMessages()) {
+                        Log.i(TAG, "MessageId: " + message.getMessageID());
+                    }
+                    chatRealmList.add(chat);
                 }
             }
         });
+        chatListAdapter.notifyDataSetChanged();
     }
-
 }

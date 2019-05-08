@@ -1,11 +1,14 @@
 package com.milind.chatapp.model;
 
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by Milind Amrutkar on 5/4/2019.
  */
 public class Message extends RealmObject {
+
+    @PrimaryKey
     private String messageID;
     private String message;
     private User sender;

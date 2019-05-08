@@ -18,6 +18,8 @@ import com.milind.chatapp.model.Message;
 
 import java.util.List;
 
+import io.realm.RealmList;
+
 /**
  * Created by Milind Amrutkar on 5/4/2019.
  */
@@ -30,9 +32,9 @@ public class MessageListAdapter extends RecyclerView.Adapter {
     private static final String TAG = "MessageListAdapter";
 
     private Context mContext;
-    private List<Message> mMessageList;
+    private RealmList<Message> mMessageList;
 
-    public MessageListAdapter(Context mContext, List<Message> mMessageList) {
+    public MessageListAdapter(Context mContext, RealmList<Message> mMessageList) {
         this.mContext = mContext;
         this.mMessageList = mMessageList;
     }
@@ -41,7 +43,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        Message message = (Message) mMessageList.get(position);
+        Message message = mMessageList.get(position);
 
         if (message.getSender().getUserId().equalsIgnoreCase("102")) {
             return VIEW_TYPE_MESSAGE_RECEIVED;

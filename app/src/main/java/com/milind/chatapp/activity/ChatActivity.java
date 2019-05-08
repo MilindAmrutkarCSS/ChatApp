@@ -22,8 +22,10 @@ import com.google.gson.GsonBuilder;
 import com.milind.chatapp.R;
 import com.milind.chatapp.adapter.MessageListAdapter;
 import com.milind.chatapp.model.BotQuestions;
+import com.milind.chatapp.model.Chat;
 import com.milind.chatapp.model.Message;
 import com.milind.chatapp.model.User;
+import com.milind.chatapp.utils.Utility;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -31,28 +33,32 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 
 public class ChatActivity extends AppCompatActivity {
 
     private RecyclerView mMessageRecycler;
     private MessageListAdapter mMessageAdapter;
-    private List<Message> mMessageList;
+    private RealmList<Message> mMessageList;
     private User selfUser, botUser;
     private Button btnSend;
     private EditText etMessage;
     ArrayList<String> questions;
+
     BotQuestions botQuestions;
     Message botMessage;
+    Chat chat;
 
     // "position" saves the current position of mMessageList. With the help of this position counter we're retrieving the questions from
     // questions list.
     int position = 0;
 
-    int userMessageId = 101;
-    int botMessageId = 101;
+    int userMessageId = 0;
+    int botMessageId = 0;
 
     private Realm mRealm;
 
@@ -68,25 +74,30 @@ public class ChatActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mMessageList = new ArrayList<>();
+        int randomNumber = Utility.generatedThreeDigitRandomNumber();
+
+        userMessageId = randomNumber;
+        botMessageId = randomNumber;
+
+        mMessageList = new RealmList<>();
 
         //initializing realm
         Realm.init(this);
         // creating an instance of Realm
         mRealm = Realm.getDefaultInstance();
 
+        chat = new Chat();
+        chat.setChatId("C" + randomNumber);
 
         initializeViews();
 
         initializeMessageList();
-
 
         // Here we're creating an object of BotQuestions to get our questions and initializing them in questions ArrayList
         botQuestions = new BotQuestions();
         botQuestions.setQuestions();
         questions = botQuestions.getQuestions();
 
-        mMessageRecycler = findViewById(R.id.recyclerview_message_list);
         mMessageAdapter = new MessageListAdapter(this, mMessageList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         mMessageRecycler.setLayoutManager(linearLayoutManager);
@@ -109,14 +120,14 @@ public class ChatActivity extends AppCompatActivity {
                 String usersReply = etMessage.getText().toString();
                 Message userMessage;
                 if (!TextUtils.isEmpty(usersReply)) {
-                    userMessage = new Message(getMessageId("me"), etMessage.getText().toString(), selfUser, getCurrentTime());
+                    userMessage = new Message(getMessageId("me"), etMessage.getText().toString(), selfUser, Utility.getCurrentTime());
                     mMessageList.add(userMessage);
                     mMessageAdapter.notifyDataSetChanged();
 
                     mRealm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
-                            realm.copyToRealm(userMessage);
+                            realm.copyToRealmOrUpdate(userMessage);
                         }
                     });
 
@@ -142,8 +153,14 @@ public class ChatActivity extends AppCompatActivity {
     private void getTheNextQuestion(int position) {
         mMessageRecycler.smoothScrollToPosition(mMessageAdapter.getItemCount());
         if (mMessageList != null) {
-            botMessage = new Message(getMessageId("bot"), questions.get(position), botUser, getCurrentTime());
+            botMessage = new Message(getMessageId("bot"), questions.get(position), botUser, Utility.getCurrentTime());
             mMessageList.add(botMessage);
+            mRealm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    realm.copyToRealmOrUpdate(botMessage);
+                }
+            });
         }
     }
 
@@ -171,6 +188,7 @@ public class ChatActivity extends AppCompatActivity {
 
     //for initializing views
     private void initializeViews() {
+        mMessageRecycler = findViewById(R.id.recyclerview_message_list);
         btnSend = findViewById(R.id.btnSend);
         etMessage = findViewById(R.id.etChatMessage);
     }
@@ -180,23 +198,15 @@ public class ChatActivity extends AppCompatActivity {
         botUser = new User("102", "bot", "https://randomuser.me/api/portraits/lego/1.jpg");
 
         if (mMessageList != null) {
-            botMessage = new Message(getMessageId("bot"), "Hello there. Please provide your name?", botUser, getCurrentTime());
+            botMessage = new Message(getMessageId("bot"), "Hello there. Please provide your name?", botUser, Utility.getCurrentTime());
             mMessageList.add(botMessage);
             mRealm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    realm.copyToRealm(botMessage);
+                    realm.copyToRealmOrUpdate(botMessage);
                 }
             });
         }
-    }
-
-    // for getting the current time
-    private String getCurrentTime() {
-        Date currentTime = Calendar.getInstance().getTime();
-        DateFormat dateFormat = new SimpleDateFormat("HH:mm ");
-        String localTime = dateFormat.format(currentTime);
-        return localTime;
     }
 
     // for generating the json
@@ -213,16 +223,25 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void execute(Realm realm) {
                 for (Message message : mMessageList) {
-                    realm.copyToRealm(message);
+                    realm.copyToRealmOrUpdate(message);
                 }
             }
         });
-        Log.i(TAG, "addMessagesToDatabase: ");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        mRealm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                chat.setMessages(mMessageList);
+                realm.copyToRealmOrUpdate(chat);
+
+            }
+        });
+
         if (mRealm != null) {
             mRealm.close();
         }

@@ -11,7 +11,6 @@ public class User extends RealmObject {
     private String profileUrl;
 
     public User() {
-
     }
 
     public User(String userId, String nickname, String profileUrl) {
